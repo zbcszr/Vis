@@ -1,0 +1,259 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+
+  <style>
+    /*======================== WORLD MAP STYLE ========================*/
+    .mesh {
+      stroke: gray;
+      stroke-width: 1px;
+      fill: none;
+    }
+
+    .landMesh {
+      stroke: grey;
+      stroke-width: 1px;
+      fill: none;
+    }
+
+    .country {
+      fill: lightgrey;
+    }
+
+    .outline {
+      stroke: black;
+      stroke-width: 1px;
+      fill: white;
+    }
+
+    rect {
+      stroke-width: 1px;
+    }
+
+    .map_graph {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+    }
+
+    /* #rangeValue {
+      position: relative;
+      display: block;
+      text-align: center;
+    } */
+
+    .map_graph .range__slider {
+      width: 500px;
+    }
+
+    .map_graph .range__slider [type="range"] {
+      width: 100%;
+      height: 15px;
+      border-radius: 100px;
+      background: #e7e7e6;
+    }
+
+    .map_graph .range__slider [type="range"]::-moz-range-thumb {
+      background: #2397c9;
+    }
+
+    /* ======================== SCATTER PLOT STYLE ========================*/
+
+    .gridlines line {
+      stroke: #bbb;
+      stroke-width: 0.5px;
+    }
+
+    .gridlines .domain {
+      stroke: none;
+    }
+
+    .slider {
+      width: 100%;
+      height: 15px;
+      border-radius: 100px;
+      background: #e7e7e6;
+    }
+
+    .flex-container {
+      display: flex;
+      margin: auto;
+      max-width: 1000;
+    }
+
+    .slider-flex-container {
+      display: flex;
+      width: 800px;
+      font-family: Arial;
+      font-weight: bold;
+    }
+
+    .slidecontainer {
+      width: 800px;
+      margin: auto;
+    }
+
+    .flex-child {
+      flex: 1;
+    }
+
+    #legend {
+      max-width: 200px;
+    }
+
+    .legend-circle,
+    .legend-svg {
+      cursor: pointer;
+    }
+
+    .scatter-line-group {
+      display: block;
+      margin: auto;
+    }
+
+    /* ======================== GENERAL STYLING ========================*/
+
+    @font-face {
+      font-family: "Open Sans";
+      src: url(fonts/OpenSans-Regular.ttf);
+      font-weight: 400;
+    }
+
+    @font-face {
+      font-family: "Open Sans Bold";
+      src: url(fonts/OpenSans-Bold.ttf);
+      font-weight: 800;
+    }
+
+    body {
+      text-align: center;
+    }
+
+    h1 {
+      font-family: "Open Sans Bold";
+      color: #2397c9;
+      font-size: 32px;
+    }
+
+    #highlight {
+      color: #145571;
+      font-family: "Open Sans Bold";
+    }
+
+    p {
+      font-family: "Open Sans";
+      color: black;
+      font-size: 15px;
+      padding: 40px;
+    }
+
+    .names {
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="heading">
+    <h1>How long is the world working?</h1>
+    <p class="names">
+      Karen Kuang (yk499), Xin Lin (xl828), Bixin Zhang (bz239)
+    </p>
+  </div>
+
+  <!-- <p> In this project</p> -->
+  <!-- ======================== MAP GRAPH ======================== -->
+  <svg id="worldMap" height="900" width="1000" style="display: block; margin: auto">
+    <text id="label" x="590" y="50" text-anchor="end" alignment-baseline="hanging"></text>
+  </svg>
+
+  <div class="map_graph">
+    <!-- map -->
+    <script src="scripts/map_workingHrs_vs_years.js"></script>
+    <!-- year slider and its script -->
+    <div class="slidecontainer" style="margin: 0px 30px 30px 30px">
+
+      <div class="slidecontainer" style="margin: 0px 30px 30px 30px">
+        <svg id="year_display" height="30" width="800">
+          <text></text>
+        </svg>
+        <div class="slider-flex-container">
+          1950
+          <input type="range" class="slider flex-child" id="yearSlider" name="yearSlider" min="1950" max="2017"
+            value="1980" />
+          2017
+          <!-- <script type="text/javascript">
+            function rangeSlide(value) {
+              document.getElementById("rangeValue").innerHTML = value;
+            }
+          </script> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== SCATTER PLOT ========================-->
+  <!-- style="border: 1px solid lightgrey;" -->
+  <div class="scatter-line-group">
+    <div class="flex-container" style="margin-top: 80px">
+      <div class="flex-child">
+        <svg id="scatter_plot" height="460" width="800"></svg>
+      </div>
+
+      <div class="flex-child" style="margin: 0px 0px 30px 0px; padding: 30px 20px 30px 0px">
+        <div id="legend"></div>
+
+        <div id="fact_table" style="margin-left: 40px">
+          <svg height="150" width="250">
+            <text id="countryLabel" x="5" y="25" text-anchor="start" alignment-baseline="middle"></text>
+            <text id="yearLabel" x="5" y="42" text-anchor="start" alignment-baseline="middle"></text>
+
+            <text id="continentLabel" x="5" y="65" text-anchor="start" alignment-baseline="middle"></text>
+            <text id="continentFact" x="110" y="65" text-anchor="start" alignment-baseline="middle"></text>
+
+            <text id="workingHourLabel" x="5" y="85" text-anchor="start" alignment-baseline="middle"></text>
+            <text id="workingHourFact" x="110" y="85" text-anchor="start" alignment-baseline="middle"></text>
+
+            <text id="GDPLabel" x="5" y="105" text-anchor="start" alignment-baseline="middle"></text>
+            <text id="GDPFact" x="110" y="105" text-anchor="start" alignment-baseline="middle"></text>
+
+            <text id="PopulationLabel" x="5" y="125" text-anchor="start" alignment-baseline="middle"></text>
+            <text id="PopulationFact" x="110" y="125" text-anchor="start" alignment-baseline="middle"></text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-container">
+      <div class="flex-child" style="margin: 0px 5px 15px 0px">
+        <svg id="line_working_hour" height="280" width="485"></svg>
+      </div>
+
+      <div class="flex-child" style="margin: 0px px 15px 5px">
+        <svg id="line_gdp" height="280" width="485"></svg>
+      </div>
+    </div>
+
+    <div class="slidecontainer" style="margin: auto; margin-bottom: 80px">
+      <svg id="year_bubble" height="30" width="800">
+        <text></text>
+      </svg>
+      <div class="slider-flex-container" style="margin: auto">
+        1950
+        <input type="range" class="slider flex-child" id="slider" name="slider" min="1950" max="2017" step="1"
+          value="1980" />
+        2017
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/scatterplot.js"></script>
+</body>
+
+</html>
