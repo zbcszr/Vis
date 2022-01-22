@@ -1,259 +1,438 @@
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <style>
+      /*======================== WORLD MAP STYLE ========================*/
+      .mesh {
+        stroke: gray;
+        stroke-width: 1px;
+        fill: none;
+      }
 
-  <style>
-    /*======================== WORLD MAP STYLE ========================*/
-    .mesh {
-      stroke: gray;
-      stroke-width: 1px;
-      fill: none;
-    }
+      .landMesh {
+        stroke: grey;
+        stroke-width: 1px;
+        fill: none;
+      }
 
-    .landMesh {
-      stroke: grey;
-      stroke-width: 1px;
-      fill: none;
-    }
+      .country {
+        fill: lightgrey;
+      }
 
-    .country {
-      fill: lightgrey;
-    }
+      .outline {
+        stroke: black;
+        stroke-width: 1px;
+        fill: white;
+      }
 
-    .outline {
-      stroke: black;
-      stroke-width: 1px;
-      fill: white;
-    }
+      rect {
+        stroke-width: 1px;
+      }
 
-    rect {
-      stroke-width: 1px;
-    }
+      .map_graph {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
+      }
 
-    .map_graph {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: row;
-    }
+      #rangeValue {
+        position: relative;
+        display: block;
+        text-align: center;
+      }
 
-    /* #rangeValue {
-      position: relative;
-      display: block;
-      text-align: center;
-    } */
+      .map_graph .range__slider {
+        width: 500px;
+      }
 
-    .map_graph .range__slider {
-      width: 500px;
-    }
+      .map_graph .range__slider [type="range"] {
+        width: 100%;
+        height: 15px;
+        border-radius: 100px;
+        background: #e7e7e6;
+      }
 
-    .map_graph .range__slider [type="range"] {
-      width: 100%;
-      height: 15px;
-      border-radius: 100px;
-      background: #e7e7e6;
-    }
+      .map_graph .range__slider [type="range"]::-moz-range-thumb {
+        background: #2397c9;
+      }
 
-    .map_graph .range__slider [type="range"]::-moz-range-thumb {
-      background: #2397c9;
-    }
+      /* ======================== SCATTER PLOT STYLE ========================*/
 
-    /* ======================== SCATTER PLOT STYLE ========================*/
+      .gridlines line {
+        stroke: #bbb;
+        stroke-width: 0.5px;
+      }
 
-    .gridlines line {
-      stroke: #bbb;
-      stroke-width: 0.5px;
-    }
+      .gridlines .domain {
+        stroke: none;
+      }
 
-    .gridlines .domain {
-      stroke: none;
-    }
+      .slider {
+        width: 800px;
+        background: #d3d3d3;
+      }
 
-    .slider {
-      width: 100%;
-      height: 15px;
-      border-radius: 100px;
-      background: #e7e7e6;
-    }
+      .flex-container {
+        display: flex;
+        margin: auto;
+        max-width: 1000;
+      }
 
-    .flex-container {
-      display: flex;
-      margin: auto;
-      max-width: 1000;
-    }
+      .slider-flex-container {
+        display: flex;
+        width: 800px;
+        font-family: Arial;
+        font-weight: bold;
+      }
 
-    .slider-flex-container {
-      display: flex;
-      width: 800px;
-      font-family: Arial;
-      font-weight: bold;
-    }
+      .slidecontainer {
+        width: 800px;
+        margin: auto;
+      }
 
-    .slidecontainer {
-      width: 800px;
-      margin: auto;
-    }
+      .flex-child {
+        flex: 1;
+      }
 
-    .flex-child {
-      flex: 1;
-    }
+      #legend {
+        max-width: 200px;
+      }
 
-    #legend {
-      max-width: 200px;
-    }
+      .legend-circle,
+      .legend-svg {
+        cursor: pointer;
+      }
 
-    .legend-circle,
-    .legend-svg {
-      cursor: pointer;
-    }
+      .scatter-line-group {
+        display: block;
+        margin: auto;
+      }
 
-    .scatter-line-group {
-      display: block;
-      margin: auto;
-    }
+      /* ======================== GENERAL STYLING ========================*/
 
-    /* ======================== GENERAL STYLING ========================*/
+      @font-face {
+        font-family: "Open Sans";
+        src: url(fonts/OpenSans-Regular.ttf);
+        font-weight: 400;
+      }
 
-    @font-face {
-      font-family: "Open Sans";
-      src: url(fonts/OpenSans-Regular.ttf);
-      font-weight: 400;
-    }
+      @font-face {
+        font-family: "Open Sans Bold";
+        src: url(fonts/OpenSans-Bold.ttf);
+        font-weight: 800;
+      }
 
-    @font-face {
-      font-family: "Open Sans Bold";
-      src: url(fonts/OpenSans-Bold.ttf);
-      font-weight: 800;
-    }
+      h1 {
+        font-family: "Open Sans Bold";
+        color: #2397c9;
+        font-size: 32px;
+        text-align: center;
+      }
 
-    body {
-      text-align: center;
-    }
+      h4 {
+        text-align: center;
+        font-size: 25px;
+        font-weight: normal;
+        margin-bottom: 0;
+        padding-bottom: 0px;
+      }
 
-    h1 {
-      font-family: "Open Sans Bold";
-      color: #2397c9;
-      font-size: 32px;
-    }
+      h5 {
+        text-align: center;
+        font-size: 20px;
+        font-weight: normal;
+        margin-bottom: 0;
+        padding-bottom: 0px;
+      }
 
-    #highlight {
-      color: #145571;
-      font-family: "Open Sans Bold";
-    }
+      #highlight {
+        color: #145571;
+        background-color: white;
+        font-family: "Open Sans Bold";
+      }
 
-    p {
-      font-family: "Open Sans";
-      color: black;
-      font-size: 15px;
-      padding: 40px;
-    }
+      p {
+        font-family: "Open Sans";
+        color: black;
+        font-size: 15px;
+        padding-left: 15%;
+        padding-right: 15%;
+      }
 
-    .names {
-      padding: 10px;
-    }
-  </style>
-</head>
+      .names {
+        padding: 10px;
+      }
+    </style>
+  </head>
 
-<body>
-  <div class="heading">
-    <h1>How long is the world working?</h1>
-    <p class="names">
-      Karen Kuang (yk499), Xin Lin (xl828), Bixin Zhang (bz239)
+  <body>
+    <div class="heading">
+      <h1>How long is the world working?</h1>
+      <p class="names" style="text-align: center">
+        Karen Kuang (yk499), Xin Lin (xl828), Bixin Zhang (bz239)
+      </p>
+    </div>
+
+    <!-- unfortunately -->
+    <p>
+      <mark id="highlight"> Working</mark> is a significant part of our lives.
+      It’s something we do almost every day. In today’s hustle and bustle world,
+      it’s easy to assume that we are all working more than ever. But is that
+      really the case? Since it is so important, exploring closely at how much
+      time we spend working would tell us a lot about our lives, even our
+      societies.
     </p>
-  </div>
+    <p>
+      In this map graph, we aim to explore how
+      <mark id="highlight">working hours change over time. </mark>
+    </p>
 
-  <!-- <p> In this project</p> -->
-  <!-- ======================== MAP GRAPH ======================== -->
-  <svg id="worldMap" height="900" width="1000" style="display: block; margin: auto">
-    <text id="label" x="590" y="50" text-anchor="end" alignment-baseline="hanging"></text>
-  </svg>
+    <!-- ======================== MAP GRAPH ======================== -->
+    <svg
+      id="worldMap"
+      height="900"
+      width="1000"
+      style="display: block; margin: auto"
+    >
+      <text
+        id="label"
+        x="590"
+        y="50"
+        text-anchor="end"
+        alignment-baseline="hanging"
+      ></text>
+    </svg>
 
-  <div class="map_graph">
-    <!-- map -->
-    <script src="scripts/map_workingHrs_vs_years.js"></script>
-    <!-- year slider and its script -->
-    <div class="slidecontainer" style="margin: 0px 30px 30px 30px">
-
+    <div class="map_graph">
+      <!-- MAP -->
+      <script src="scripts/map_workingHrs_vs_years.js"></script>
+      <!-- YEAR SLIDER && ITS SCRIPT -->
       <div class="slidecontainer" style="margin: 0px 30px 30px 30px">
         <svg id="year_display" height="30" width="800">
-          <text></text>
+          <text
+            id="year_text"
+            x="362.388"
+            y="20"
+            style="font-family: Arial; font-weight: bold; text-anchor: middle"
+          >
+            1980
+          </text>
         </svg>
         <div class="slider-flex-container">
           1950
-          <input type="range" class="slider flex-child" id="yearSlider" name="yearSlider" min="1950" max="2017"
-            value="1980" />
+          <input
+            type="range"
+            class="slider flex-child"
+            id="yearSlider"
+            name="yearSlider"
+            min="1950"
+            max="2017"
+            value="1980"
+            onInput="updateText(this.value)"
+          />
           2017
-          <!-- <script type="text/javascript">
-            function rangeSlide(value) {
-              document.getElementById("rangeValue").innerHTML = value;
-            }
-          </script> -->
+        </div>
+        <script type="text/javascript">
+          const display = d3.select("svg#year_display");
+          // update slider bar year
+          var sliderYearScale = d3
+            .scaleLinear()
+            .domain([1950, 2017])
+            .range([40, 760]);
+          function updateText(value) {
+            let check = display
+              .select("text#year_text")
+              .join("text")
+              .text(value)
+              .attr("x", (d) => sliderYearScale(value))
+              .attr("y", 20)
+              .style("font-family", "Arial")
+              .style("font-weight", "bold")
+              .style("text-anchor", "middle");
+          }
+        </script>
+      </div>
+    </div>
+
+    <!-- ======================== SCATTER PLOT ========================-->
+    <p>
+      Based on the map, we found that in many countries today,
+      <mark id="highlight"
+        >people work much less than in the past 60 years</mark
+      >
+      . Working less means people being able to enjoy leisure time and spend
+      time becoming more educated. <br />
+      <br />
+      This is substantial progress, but there are
+      <mark id="highlight"> large differences between countries</mark>, for
+      example people from countries in Asia do not work less, but even work more
+      than before. For that reason, we want to explore the relationship between
+      working hours and prosperity. <br />
+      <br />
+    </p>
+    <p>
+      When considering such differences in prosperity, a natural question is:
+      who works more, people in richer countries like Norway or in poorer ones
+      like Myanmar? <mark id="highlight">Therefore,</mark> in the following
+      graphs, we aim to explore whether the
+      <mark id="highlight"
+        >varying lengths of work contribute to different levels of wealth</mark
+      >
+      in the scatter and line polots.
+    </p>
+
+    <h4>GDP (dollars) vs Weekly Working Hours</h4>
+    <div class="scatter-line-group">
+      <div class="flex-container" style="margin-top: 30px">
+        <div class="flex-child">
+          <svg id="scatter_plot" height="460" width="800"></svg>
+        </div>
+
+        <div
+          class="flex-child"
+          style="margin: 0px 0px 30px 0px; padding: 30px 20px 30px 0px"
+        >
+          <div id="legend"></div>
+
+          <div id="fact_table">
+            <svg height="150" width="250">
+              <text
+                id="countryLabel"
+                x="5"
+                y="25"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+              <text
+                id="yearLabel"
+                x="5"
+                y="42"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+
+              <text
+                id="continentLabel"
+                x="5"
+                y="65"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+              <text
+                id="continentFact"
+                x="110"
+                y="65"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+
+              <text
+                id="workingHourLabel"
+                x="5"
+                y="85"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+              <text
+                id="workingHourFact"
+                x="110"
+                y="85"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+
+              <text
+                id="GDPLabel"
+                x="5"
+                y="105"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+              <text
+                id="GDPFact"
+                x="110"
+                y="105"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+
+              <text
+                id="PopulationLabel"
+                x="5"
+                y="125"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+              <text
+                id="PopulationFact"
+                x="110"
+                y="125"
+                text-anchor="start"
+                alignment-baseline="middle"
+              ></text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-container">
+        <div class="flex-child" style="margin: 0px 5px 15px 0px">
+          <h5>Weekly Working Hours vs Year</h5>
+          <svg id="line_working_hour" height="280" width="485"></svg>
+        </div>
+
+        <div class="flex-child" style="margin: 0px px 15px 5px">
+          <h5>GDP (dollars) vs Year</h5>
+          <svg id="line_gdp" height="280" width="485"></svg>
+        </div>
+      </div>
+
+      <div class="slidecontainer" style="margin: auto; margin-bottom: 80px">
+        <svg id="year_bubble" height="30" width="800">
+          <text></text>
+        </svg>
+        <div class="slider-flex-container" style="margin: auto">
+          1950
+          <input
+            type="range"
+            class="slider flex-child"
+            id="slider"
+            name="slider"
+            min="1950"
+            max="2017"
+            step="1"
+            value="1980"
+          />
+          2017
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ======================== SCATTER PLOT ========================-->
-  <!-- style="border: 1px solid lightgrey;" -->
-  <div class="scatter-line-group">
-    <div class="flex-container" style="margin-top: 80px">
-      <div class="flex-child">
-        <svg id="scatter_plot" height="460" width="800"></svg>
-      </div>
+    <script src="scripts/scatterplot.js"></script>
 
-      <div class="flex-child" style="margin: 0px 0px 30px 0px; padding: 30px 20px 30px 0px">
-        <div id="legend"></div>
-
-        <div id="fact_table" style="margin-left: 40px">
-          <svg height="150" width="250">
-            <text id="countryLabel" x="5" y="25" text-anchor="start" alignment-baseline="middle"></text>
-            <text id="yearLabel" x="5" y="42" text-anchor="start" alignment-baseline="middle"></text>
-
-            <text id="continentLabel" x="5" y="65" text-anchor="start" alignment-baseline="middle"></text>
-            <text id="continentFact" x="110" y="65" text-anchor="start" alignment-baseline="middle"></text>
-
-            <text id="workingHourLabel" x="5" y="85" text-anchor="start" alignment-baseline="middle"></text>
-            <text id="workingHourFact" x="110" y="85" text-anchor="start" alignment-baseline="middle"></text>
-
-            <text id="GDPLabel" x="5" y="105" text-anchor="start" alignment-baseline="middle"></text>
-            <text id="GDPFact" x="110" y="105" text-anchor="start" alignment-baseline="middle"></text>
-
-            <text id="PopulationLabel" x="5" y="125" text-anchor="start" alignment-baseline="middle"></text>
-            <text id="PopulationFact" x="110" y="125" text-anchor="start" alignment-baseline="middle"></text>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex-container">
-      <div class="flex-child" style="margin: 0px 5px 15px 0px">
-        <svg id="line_working_hour" height="280" width="485"></svg>
-      </div>
-
-      <div class="flex-child" style="margin: 0px px 15px 5px">
-        <svg id="line_gdp" height="280" width="485"></svg>
-      </div>
-    </div>
-
-    <div class="slidecontainer" style="margin: auto; margin-bottom: 80px">
-      <svg id="year_bubble" height="30" width="800">
-        <text></text>
-      </svg>
-      <div class="slider-flex-container" style="margin: auto">
-        1950
-        <input type="range" class="slider flex-child" id="slider" name="slider" min="1950" max="2017" step="1"
-          value="1980" />
-        2017
-      </div>
-    </div>
-  </div>
-
-  <script src="scripts/scatterplot.js"></script>
-</body>
-
+    <p>
+      We got two insights by looking at the scatter plot: first, people who
+      <mark id="highlight">work more hours</mark> usually come from<mark
+        id="highlight"
+      >
+        poorer countries</mark
+      >; second, people from
+      <mark id="highlight"> more populous countries</mark> usually
+      <mark id="highlight">work more </mark>
+      than less populated countries. We suspect that this may due to Involution.
+      <br />
+      <br />
+      A further investigation through the line graphs tell us the story between
+      <mark id="highlight">working hours and continents</mark>. we see that
+      people from Asia usually work more over the years even though its GDP is
+      in the lower end among all continents; people from South America, North
+      America, Oceania, and Europe tend to work less over the years.
+    </p>
+  </body>
 </html>
